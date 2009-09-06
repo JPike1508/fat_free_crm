@@ -1,0 +1,36 @@
+id = dom_id(@prospect)
+
+if params[:cancel] == "true" # <----------------- Hide [Edit Campaign]
+
+  if called_from_landing_page?
+    page.call "crm.flip_form", :edit_prospect
+    page.call "crm.set_title", :edit_prospect, @prospect.full_name
+  else                                            # Called from leads list item...
+    page[id].replace :partial => "prospect", :collection => [ @prospect ]
+  end
+
+else # <----------------------------------------  Show [Edit Campaign] form.
+
+  if params[:cancel].blank?                       # Called from leads list item...
+    if @previous                                  # Hide open [Edit Prospect] form if any.
+      if @previous.is_a?(prospect)
+        page[dom_id(@previous)].replace :partial => "prospect", :collection => [ @previous ]
+      else
+        page.call "crm.flick", "prospect_#{@previous}", :remove
+      end
+    end
+    page.call "crm.highlight_off", id             # Disable onMouseOver for the list item.
+    page.call "crm.hide_form", :create_prospect       # Hide [Create Lead] form if any.
+    page[id].replace_html :partial => "edit"      # Show [Edit Prospect] form.
+
+  elsif params[:cancel] == "false"                # Called from title of the lead landing page...
+    page[:edit_prospect].replace_html :partial => "edit"
+    unless %w(converted rejected).include? @prospect.status
+      page.call "crm.hide_form", :convert_prospect
+    end
+    page.call "crm.flip_form", :edit_prospect
+    page.call "crm.set_title", :edit_prospect, "Edit #{@prospect.full_name}"
+  end
+  page[:prospect_first_name].focus
+
+end

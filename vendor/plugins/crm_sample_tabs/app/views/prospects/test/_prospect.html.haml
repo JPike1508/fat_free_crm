@@ -1,0 +1,9 @@
+%li[prospect]{ highlightable(dom_id(prospect, :tools)) }
+      = prospect.full_name
+      = prospect.first_name
+      = prospect.last_name
+      = prospect.home_phone
+      = prospect.email
+      = prospect.created_at
+      = prospect.updated_at
+      = link_to_edit(prospect)
